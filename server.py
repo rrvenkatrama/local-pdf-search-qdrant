@@ -39,6 +39,7 @@ app = FastAPI(title="Local PDF Search (Qdrant)")
 class SearchRequest(BaseModel):
     query: str
     top_k: int | None = None
+    doc_type: str | None = None  # "personal" / "reference" / None (= all)
 
 
 class OpenRequest(BaseModel):
@@ -55,7 +56,9 @@ def search_endpoint(req: SearchRequest) -> dict:
     query = req.query.strip()
     if not query:
         return {"query": query, "results": []}
-    return {"query": query, "results": search.hybrid_search(cfg, query, req.top_k)}
+    return {"query": query,
+            "results": search.hybrid_search(cfg, query, req.top_k,
+                                            req.doc_type or None)}
 
 
 @app.post("/open")

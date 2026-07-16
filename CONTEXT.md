@@ -34,9 +34,22 @@ RRF fused INSIDE Qdrant) ⇢ static/index.html.
 ## Quality comparison outcome (2026-07-15)
 v2 is decisively more semantic (dense ranks dominate its fusion; keyword
 queries still nail exact docs like the Oracle offer letter). BUT: on
-"What projects do I have where I managed change", v2 returns PM TEXTBOOKS
+"What projects do I have where I managed change", v2 returned PM TEXTBOOKS
 (PMBOK, practice guides) — semantically closest to the words, not the
 user's intent (his own project docs). Root cause: the corpus mixes
-reference books with personal documents. Candidate remedies, not yet
-applied: exclude_globs for textbook folders (e.g. ~/Documents/PMI),
-raising sparse_candidates for own-doc queries, or a doc-type facet.
+reference books with personal documents.
+
+**Remedy applied (2026-07-15): doc-type facet.** `doc_type_globs` in
+config.yaml classifies files by path (courseware/textbook folders +
+loose ebook/handbook filenames → "reference"; everything else →
+"personal"; ~100 reference files). Every Qdrant point carries a
+`doc_type` payload (keyword-indexed); the filter is applied inside BOTH
+prefetch branches, so filtered-out chunks free their candidate slots
+rather than just being masked. UI: All / My docs / Reference chips.
+Verified: the query above under "My docs" now returns his own PMO
+project docs and resumes, zero textbooks.
+
+Maintenance: after editing `doc_type_globs`, run
+`./venv/bin/python indexer.py --retag` — payload-only re-stamp of the
+whole index (~7 s, no re-embedding). New/changed files are classified
+at index time automatically.

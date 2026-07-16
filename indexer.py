@@ -18,6 +18,9 @@ the UI's "Re-index now" button. A lock file prevents overlapping runs.
 Usage:
     python indexer.py             # index everything configured
     python indexer.py --limit 20  # stop after 20 changed files (testing)
+    python indexer.py --retag     # re-stamp doc_type on the existing index
+                                  # (after editing doc_type_globs; payload-only,
+                                  # no re-embedding, takes seconds)
 """
 
 import argparse
@@ -161,6 +164,26 @@ def index_file(conn, cfg, path: Path, stat: os.stat_result,
 
 
 # ---------------------------------------------------------------------------
+# Re-tag doc_type (facet) without re-indexing
+# ---------------------------------------------------------------------------
+
+def retag_doc_types() -> None:
+    """Reclassify every indexed file per config doc_type_globs and stamp
+    the doc_type payload onto its chunks. Pure payload update — vectors
+    are untouched, so this is cheap enough to run after every glob edit."""
+    cfg = load_config()
+    store.ensure_collection(cfg)  # (re)declares the doc_type payload index
+    conn = manifest.connect()
+    by_type: dict[str, list[str]] = {}
+    for path in manifest.all_paths(conn):
+        by_type.setdefault(cfg.doc_type(path), []).append(path)
+    conn.close()
+    for dtype, paths in sorted(by_type.items()):
+        store.set_doc_type(cfg, paths, dtype)
+        log.info("Tagged %d files as doc_type=%s", len(paths), dtype)
+
+
+# ---------------------------------------------------------------------------
 # Main crawl
 # ---------------------------------------------------------------------------
 
@@ -248,6 +271,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--limit", type=int, default=None,
                         help="stop after N changed files (for testing)")
+    parser.add_argument("--retag", action="store_true",
+                        help="only re-stamp doc_type payloads (facet), no indexing")
     args = parser.parse_args()
 
     # Log to both the console and data/index.log.
@@ -266,7 +291,10 @@ def main() -> None:
         log.error("Another indexer is already running (lock: %s)", LOCK_PATH)
         sys.exit(1)
     try:
-        run(limit=args.limit)
+        if args.retag:
+            retag_doc_types()
+        else:
+            run(limit=args.limit)
     finally:
         release_lock()
 

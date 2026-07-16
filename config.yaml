@@ -10,6 +10,29 @@ roots:
 # Glob patterns to skip, matched against the full file path.
 exclude_globs: []
 
+# Doc-type facet. The corpus mixes personal documents with reference
+# material (textbooks, courseware, downloaded guides); semantic search
+# ranks a PMBOK chapter above your own project docs on queries like
+# "projects where I managed change". Every file gets a doc_type payload:
+# first matching glob below wins, anything unmatched is "personal".
+# The UI exposes this as an All / My docs / Reference filter.
+# After editing these globs, re-tag the existing index with:
+#   ./venv/bin/python indexer.py --retag
+doc_type_globs:
+  reference:
+    - "~/Documents/PMI/*"
+    - "~/Documents/ISE 201/*"
+    - "~/Documents/ECS 150/*"
+    - "~/Documents/SJSU/*"
+    - "~/Documents/MIT AI Certiification Course/*"
+    - "~/Documents/Modern Linear Algebra/*"
+    - "~/Documents/Syllabus Ohlone College/*"
+    - "~/Documents/Interview Prep AI and Program Manager/*"
+    - "~/Documents/Google Interview Prep/*"
+    # Downloaded books/guides sitting loose in the Documents root:
+    - "*ebook*"
+    - "*HANDBOOK*"
+
 # Dense embedding model (sentence-transformers name). BAAI/bge-m3:
 # 1024-dim, multilingual, retrieval quality on par with OpenAI
 # text-embedding-3-small. ~2.3 GB one-time download, then fully offline.

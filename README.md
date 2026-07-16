@@ -27,7 +27,7 @@ SQLite FTS5. No cloud, no API keys, no Docker.
                               ▼  upsert points
                     Qdrant server :6333  (launchd, bin/qdrant)
                     one collection, per chunk:
-                      dense[1024] + sparse{term→weight} + payload{path,page,text}
+                      dense[1024] + sparse{term→weight} + payload{path,page,text,doc_type}
                               ▲  one hybrid query (RRF fusion server-side)
               ┌───────────────┴──────────────────────────────┐
  browser ────▶│  server.py (FastAPI :8131) + static UI        │
@@ -42,6 +42,13 @@ SQLite FTS5. No cloud, no API keys, no Docker.
   skipped and logged.
 - **Semantic/keyword balance:** `dense_candidates` vs `sparse_candidates`
   in `config.yaml` biases fusion (30/20 default leans semantic).
+- **Doc-type facet:** the corpus mixes personal documents with reference
+  material (textbooks, courseware), and semantic search happily ranks a
+  PMBOK chapter above your own project docs. `doc_type_globs` in
+  `config.yaml` tags every file `personal` or `reference` at index time;
+  the UI's All / My docs / Reference chips filter both prefetch branches
+  server-side. After editing the globs, re-stamp the existing index with
+  `./venv/bin/python indexer.py --retag` (payload-only, seconds).
 
 ## Setup
 

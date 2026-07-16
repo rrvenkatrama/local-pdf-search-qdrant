@@ -62,19 +62,24 @@ def make_snippet(text: str, query: str) -> str:
     return snippet
 
 
-def hybrid_search(cfg: Config, query: str, top_k: int | None = None) -> list[dict]:
+def hybrid_search(cfg: Config, query: str, top_k: int | None = None,
+                  doc_type: str | None = None) -> list[dict]:
     """Run the hybrid query and return display-ready results.
 
     Each result dict: file_path, filename, page, snippet, score (RRF),
-    dense_rank, sparse_rank (None when the chunk wasn't in that engine's
-    candidate list — useful for judging semantic vs keyword balance).
+    doc_type, dense_rank, sparse_rank (None when the chunk wasn't in that
+    engine's candidate list — useful for judging semantic vs keyword balance).
+
+    doc_type ("personal" / "reference", from config doc_type_globs)
+    restricts the search to that slice of the corpus; None searches all.
     """
     top_k = top_k or cfg.top_k
     dense, sparse = embedder.embed_query(cfg.dense_model, cfg.sparse_model, query)
 
-    hits = store.hybrid_query(cfg, dense, sparse, top_k)
+    hits = store.hybrid_query(cfg, dense, sparse, top_k, doc_type)
     dense_rank, sparse_rank = store.single_engine_ranks(
-        cfg, dense, sparse, max(cfg.dense_candidates, cfg.sparse_candidates)
+        cfg, dense, sparse, max(cfg.dense_candidates, cfg.sparse_candidates),
+        doc_type,
     )
 
     results = []
@@ -86,6 +91,7 @@ def hybrid_search(cfg: Config, query: str, top_k: int | None = None) -> list[dic
             "file_path": path,
             "filename": path.rsplit("/", 1)[-1],
             "page": payload.get("page"),
+            "doc_type": payload.get("doc_type", "personal"),
             "snippet": make_snippet(payload.get("text", ""), query),
             "score": round(point.score, 5),
             "dense_rank": dense_rank.get(str(point.id)),

@@ -5,6 +5,7 @@ This module loads it once and exposes it as a simple Config object,
 plus the standard locations for generated data (data/ folder).
 """
 
+import fnmatch
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -26,6 +27,7 @@ class Config:
 
     roots: list[Path] = field(default_factory=list)
     exclude_globs: list[str] = field(default_factory=list)
+    doc_type_globs: dict[str, list[str]] = field(default_factory=dict)
     dense_model: str = "BAAI/bge-m3"
     dense_dim: int = 1024
     sparse_model: str = "Qdrant/bm25"
@@ -38,6 +40,13 @@ class Config:
     collection: str = "pdf_chunks"
     port: int = 8131
 
+    def doc_type(self, path: str) -> str:
+        """Classify a file path via doc_type_globs; unmatched → "personal"."""
+        for dtype, globs in self.doc_type_globs.items():
+            if any(fnmatch.fnmatch(path, g) for g in globs):
+                return dtype
+        return "personal"
+
 
 def load_config() -> Config:
     """Read config.yaml and return a Config with expanded, absolute root paths."""
@@ -45,6 +54,10 @@ def load_config() -> Config:
     cfg = Config(
         roots=[Path(r).expanduser().resolve() for r in raw.get("roots", [])],
         exclude_globs=raw.get("exclude_globs") or [],
+        doc_type_globs={
+            dtype: [str(Path(g).expanduser()) for g in globs or []]
+            for dtype, globs in (raw.get("doc_type_globs") or {}).items()
+        },
         dense_model=raw.get("dense_model", Config.dense_model),
         dense_dim=int(raw.get("dense_dim", Config.dense_dim)),
         sparse_model=raw.get("sparse_model", Config.sparse_model),
