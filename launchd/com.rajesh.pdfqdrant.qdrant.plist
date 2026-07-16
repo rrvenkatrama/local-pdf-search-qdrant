@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Qdrant vector database server (native Apple Silicon binary in bin/,
+  no Docker). Starts at login, auto-restarts on crash. Storage lives in
+  the project's data/qdrant-storage/.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.rajesh.pdfqdrant.qdrant</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>__PROJECT_ROOT__/bin/qdrant</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>__PROJECT_ROOT__</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>QDRANT__STORAGE__STORAGE_PATH</key>
+        <string>__PROJECT_ROOT__/data/qdrant-storage</string>
+        <key>QDRANT__SERVICE__HTTP_PORT</key>
+        <string>6333</string>
+        <key>QDRANT__TELEMETRY_DISABLED</key>
+        <string>true</string>
+    </dict>
+
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>ThrottleInterval</key>
+    <integer>5</integer>
+
+    <key>StandardOutPath</key>
+    <string>__PROJECT_ROOT__/data/qdrant.log</string>
+    <key>StandardErrorPath</key>
+    <string>__PROJECT_ROOT__/data/qdrant.log</string>
+</dict>
+</plist>

@@ -1,0 +1,40 @@
+# ============================================================================
+# Local PDF Search (Qdrant edition) — configuration
+# Read by both the indexer (indexer.py) and the search service (server.py).
+# ============================================================================
+
+# Folders to crawl for PDFs (recursive). ~ is expanded to your home directory.
+roots:
+  - "~/Documents"
+
+# Glob patterns to skip, matched against the full file path.
+exclude_globs: []
+
+# Dense embedding model (sentence-transformers name). BAAI/bge-m3:
+# 1024-dim, multilingual, retrieval quality on par with OpenAI
+# text-embedding-3-small. ~2.3 GB one-time download, then fully offline.
+dense_model: "BAAI/bge-m3"
+dense_dim: 1024
+
+# Sparse (keyword/BM25) model used via fastembed. Produces term-weight
+# vectors; Qdrant applies IDF server-side (see kb/store.py).
+sparse_model: "Qdrant/bm25"
+
+# Chunking: windows of complete sentences, with overlap between windows.
+chunk_sentences: 8          # sentences per chunk
+chunk_overlap_sentences: 4  # sentences shared between consecutive chunks
+
+# Search tuning. Hybrid fusion happens INSIDE Qdrant (RRF over the two
+# prefetch lists). Raising dense_candidates relative to sparse_candidates
+# biases results toward semantic matches, and vice versa.
+top_k: 10                   # results returned to the UI
+dense_candidates: 30        # semantic hits fed into the fusion
+sparse_candidates: 20       # keyword/BM25 hits fed into the fusion
+
+# Qdrant server (native binary in bin/, run as a launchd agent).
+qdrant_url: "http://127.0.0.1:6333"
+collection: "pdf_chunks"
+
+# Port for the FastAPI search service (UI at http://localhost:<port>/).
+# 8131 so the v1 (Chroma/FTS5) app can keep running on 8130.
+port: 8131

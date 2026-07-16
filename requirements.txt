@@ -1,0 +1,9 @@
+# Local PDF Search (Qdrant edition) — all local, no API costs.
+pymupdf>=1.24            # PDF text extraction (fitz)
+sentence-transformers>=3.0   # dense embeddings: BAAI/bge-m3 (pulls in torch)
+qdrant-client>=1.12      # talks to the local Qdrant server
+fastembed>=0.4           # BM25 sparse embeddings (Qdrant/bm25 model)
+pysbd>=0.3               # rule-based sentence boundary detection
+fastapi>=0.111           # search service
+uvicorn>=0.30            # ASGI server for FastAPI
+pyyaml>=6.0              # config.yaml loading

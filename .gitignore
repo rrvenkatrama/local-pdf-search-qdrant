@@ -1,0 +1,13 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Qdrant native binary (downloaded by install.sh, ~70 MB)
+bin/
+
+# All generated data: Qdrant storage, manifest DB, logs
+data/
+
+# macOS
+.DS_Store

@@ -1,0 +1,22 @@
+{
+    // VS Code workspace for the Local PDF Search (Qdrant edition) project.
+    "folders": [
+        {
+            "name": "PDF Search Qdrant",
+            "path": "."
+        }
+    ],
+    "settings": {
+        "python.defaultInterpreterPath": "${workspaceFolder}/venv/bin/python",
+        "python.terminal.activateEnvironment": true,
+        "files.exclude": {
+            "**/__pycache__": true,
+            "**/.DS_Store": true
+        }
+    },
+    "extensions": {
+        "recommendations": [
+            "ms-python.python"
+        ]
+    }
+}
