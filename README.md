@@ -1,13 +1,13 @@
 # Local PDF Search — Qdrant Edition
 
 Fully local hybrid search over your PDF documents. v2 of
-[local-pdf-search-kb](https://github.com/rrvenkatrama/local-pdf-search-kb):
+[local-pdf-search-chromadb-sqlite-fts5](https://github.com/rrvenkatrama/local-pdf-search-chromadb-sqlite-fts5):
 a much stronger embedding model and Qdrant replacing both Chroma and
 SQLite FTS5. No cloud, no API keys, no Docker.
 
 ## What changed vs v1
 
-| | v1 (`local-pdf-search-kb`) | v2 (this repo) |
+| | v1 (`local-pdf-search-chromadb-sqlite-fts5`) | v2 (this repo) |
 |---|---|---|
 | Dense model | multilingual MiniLM (384-dim) | **BAAI/bge-m3 (1024-dim)** — quality on par with OpenAI text-embedding-3-small |
 | Semantic index | Chroma (embedded) | **Qdrant server** (native Apple Silicon binary, launchd — no Docker) |
